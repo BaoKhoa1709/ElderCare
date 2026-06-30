@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Dto\LoginUserRequest;
 use App\Dto\RegisterUserRequest;
 use App\Enums\Gender;
 use App\Enums\Role;
@@ -20,5 +21,16 @@ class UserServiceImp implements UserService
             'gender' => $request->gender,
             'role' => Role::USER->value,
         ]);
+    }
+
+    public function authenticateUser(LoginUserRequest $request): ?User
+    {
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return null;
+        }
+
+        return $user;
     }
 }
