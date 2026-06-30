@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Gender;
 use App\Enums\Role;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -17,8 +18,10 @@ class User extends Authenticatable
 
     protected $fillable = [
         'uid',
+        'full_name',
         'email',
         'password',
+        'gender',
         'role',
     ];
 
@@ -30,6 +33,7 @@ class User extends Authenticatable
     {
         return [
             'role' => Role::class,
+            'gender' => Gender::class,
             'password' => 'hashed',
         ];
     }

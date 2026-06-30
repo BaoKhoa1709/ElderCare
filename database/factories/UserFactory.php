@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\Gender;
 use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -19,9 +20,11 @@ class UserFactory extends Factory
     {
         return [
             'uid' => Str::uuid()->toString(),
+            'full_name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'password' => static::$password ??= Hash::make('password'),
-            'role' => Role::SEEKER->value,
+            'gender' => fake()->randomElement([Gender::MALE->value, Gender::FEMALE->value]),
+            'role' => Role::USER->value,
         ];
     }
 }
