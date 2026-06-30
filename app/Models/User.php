@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\Gender;
 use App\Enums\Role;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -36,5 +37,15 @@ class User extends Authenticatable
             'gender' => Gender::class,
             'password' => 'hashed',
         ];
+    }
+
+    public function careGiver(): HasOne
+    {
+        return $this->hasOne(CareGiver::class, 'user_uid', 'uid');
+    }
+
+    public function careSeeker(): HasOne
+    {
+        return $this->hasOne(CareSeeker::class, 'user_uid', 'uid');
     }
 }
