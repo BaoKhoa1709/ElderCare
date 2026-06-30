@@ -1,4 +1,4 @@
-# 🏥 ElderSync
+# 🏥 ElderSync (Legacy Collaboration Work)
 
 **ElderSync** is a **care management platform** that connects **Care Seekers** (those in need of care) with **Care Givers** (those who provide care).  
 It is built as a **RESTful Spring Boot backend** with a **React frontend**, featuring AI-powered matching, booking lifecycle management, secure authentication, and payment integration.
@@ -63,63 +63,6 @@ ElderSync follows a **client–server architecture**:
 - Configurable CORS support  
 
 ---
-
-## 📦 Installation & Setup
-
-### 1. Clone Repository
-```bash
-git clone https://github.com/Minh20Duc04/ElderSync.git
-cd ElderSync
-```
-
-### 2. Backend (Spring Boot)
-```bash
-cd backend
-./mvnw clean install
-./mvnw spring-boot:run
-```
-Then create database:
-
-```bash
-- Create a MySQL database (e.g. `eldersync`).
-- Update `application.yml` with credentials & secrets:
-  - Database connection
-  - JWT secret key
-  - API keys (Exchange rate, AI chatbot)
-  - Cloudinary config
-  - Gmail SMTP credentials
-```
-By default, the backend runs on:
-http://localhost:2004
-
-### 3. Frontend (React)
-```bash
-cd frontend
-npm install
-npm start
-```
-By default, the frontend runs on:
-http://localhost:3000
-
-## 📚 API Documentation
-Once the backend is running, the API documentation is available via Swagger UI:
-```bash
-http://localhost:2004/swagger-ui.html
-```
-This provides detailed information about all REST endpoints, request/response schemas, and authentication requirements.
-
-## 🤝 Contributing
-We welcome contributions to improve ElderSync!
-
-Fork the repository
-
-Create a feature branch:
-git checkout -b feature/your-feature
-Commit your changes:
-git commit -m "Add new feature: your-feature"
-Push the branch:
-git push origin feature/your-feature
-Open a Pull Request
 
 ## 📄 License
 This project is licensed under the MIT License.
