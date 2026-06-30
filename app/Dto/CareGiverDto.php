@@ -12,7 +12,12 @@ class CareGiverDto
         public ?int $yearExperience,
         public ?float $fee,
         public ?string $bio,
-        public ?string $imageUrl
+        public ?string $imageUrl,
+        public ?array $skills = null,
+        public ?array $certifications = null,
+        public ?array $schedules = null,
+        public ?string $fullName = null,
+        public ?string $email = null
     ) {
     }
 
@@ -26,7 +31,12 @@ class CareGiverDto
             yearExperience: $data['year_experience'] ?? null,
             fee: $data['fee'] ?? null,
             bio: $data['bio'] ?? null,
-            imageUrl: $data['image_url'] ?? null
+            imageUrl: $data['image_url'] ?? null,
+            skills: $data['skills'] ?? null,
+            certifications: $data['certifications'] ?? null,
+            schedules: $data['schedules'] ?? null,
+            fullName: $data['full_name'] ?? null,
+            email: $data['email'] ?? null
         );
     }
 }

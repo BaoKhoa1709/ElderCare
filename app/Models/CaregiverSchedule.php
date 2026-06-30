@@ -18,8 +18,6 @@ class CaregiverSchedule extends Model
     {
         return [
             'day_of_weeks' => 'array',
-            'start_time' => 'datetime:H:i',
-            'end_time' => 'datetime:H:i',
         ];
     }
 

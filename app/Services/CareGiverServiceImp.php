@@ -7,6 +7,7 @@ use App\Models\CareGiver;
 use App\Models\CareGiverSkill;
 use App\Models\CaregiverCertification;
 use App\Models\CaregiverSchedule;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -14,15 +15,33 @@ class CareGiverServiceImp implements CareGiverService
 {
     public function createCareGiver(array $data): CareGiverDto
     {
-        $careGiver = DB::transaction(function () use ($data) {
+        $userUid = $data['user_uid'];
+        $phoneNumber = $data['phone_number'];
+
+        $existingCareGiver = CareGiver::where('user_uid', $userUid)->first();
+        if ($existingCareGiver) {
+            throw new \InvalidArgumentException('User already has a caregiver profile');
+        }
+
+        $phoneExists = CareGiver::where('phone_number', $phoneNumber)->first();
+        if ($phoneExists) {
+            throw new \InvalidArgumentException('Phone number already registered');
+        }
+
+        $user = User::where('uid', $userUid)->first();
+        if (!$user) {
+            throw new \InvalidArgumentException('User not found');
+        }
+
+        $careGiver = DB::transaction(function () use ($data, $user) {
             $careGiver = CareGiver::create([
                 'uid' => (string) Str::uuid(),
                 'user_uid' => $data['user_uid'],
-                'dob' => $data['dob'] ?? null,
-                'phone_number' => $data['phone_number'] ?? null,
-                'year_experience' => $data['year_experience'] ?? null,
-                'fee' => $data['fee'] ?? null,
-                'bio' => $data['bio'] ?? null,
+                'dob' => $data['dob'],
+                'phone_number' => $data['phone_number'],
+                'year_experience' => $data['year_experience'],
+                'fee' => $data['fee'],
+                'bio' => $data['bio'],
                 'image_url' => $data['image_url'] ?? null,
             ]);
 
@@ -39,7 +58,7 @@ class CareGiverServiceImp implements CareGiverService
                 foreach ($data['certifications'] as $cert) {
                     CaregiverCertification::create([
                         'care_giver_uid' => $careGiver->uid,
-                        'certificate_name' => $cert['name'] ?? '',
+                        'certificate_name' => $cert['name'],
                         'issuer' => $cert['issuer'] ?? null,
                         'issue_date' => $cert['issue_date'] ?? null,
                         'expiration_date' => $cert['expiration_date'] ?? null,
@@ -51,7 +70,7 @@ class CareGiverServiceImp implements CareGiverService
                 foreach ($data['schedules'] as $schedule) {
                     CaregiverSchedule::create([
                         'care_giver_uid' => $careGiver->uid,
-                        'day_of_weeks' => $schedule['days'] ?? [],
+                        'day_of_weeks' => $schedule['days'],
                         'start_time' => $schedule['start_time'],
                         'end_time' => $schedule['end_time'],
                     ]);
@@ -61,7 +80,15 @@ class CareGiverServiceImp implements CareGiverService
             return $careGiver;
         });
 
-        return CareGiverDto::fromArray($careGiver->toArray());
+        $careGiverWithRelations = CareGiver::with(['skills', 'certifications', 'schedules'])
+            ->where('uid', $careGiver->uid)
+            ->first();
+
+        $careGiverArray = $careGiverWithRelations->toArray();
+        $careGiverArray['full_name'] = $user->full_name;
+        $careGiverArray['email'] = $user->email;
+
+        return CareGiverDto::fromArray($careGiverArray);
     }
 
     public function getByUid(string $uid): ?CareGiverDto
@@ -93,7 +120,7 @@ class CareGiverServiceImp implements CareGiverService
 
     public function searchByName(string $name): array
     {
-        $users = \App\Models\User::where('full_name', 'like', "%{$name}%")->get();
+        $users = User::where('full_name', 'like', "%{$name}%")->get();
 
         return $users->flatMap(function ($user) {
             if ($user->careGiver) {
