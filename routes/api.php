@@ -8,3 +8,4 @@ use App\Http\Controllers\CareGiverController;
 Route::post('/register', [RegisteredUserController::class, 'register']);
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/caregivers', [CareGiverController::class, 'store'])->middleware('auth:sanctum');
+Route::post('/caregivers/linkImage', [CareGiverController::class, 'linkImage'])->middleware('auth:sanctum');

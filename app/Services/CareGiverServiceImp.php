@@ -9,6 +9,7 @@ use App\Models\CaregiverCertification;
 use App\Models\CaregiverSchedule;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class CareGiverServiceImp implements CareGiverService
@@ -129,5 +130,25 @@ class CareGiverServiceImp implements CareGiverService
 
             return [];
         })->all();
+    }
+
+    public function uploadFile(string $tempPath): string
+    {
+        return Storage::disk('public')->putFile('caregivers', $tempPath);
+    }
+
+    public function linkImageToGiver(string $giverUid, string $filePath): string
+    {
+        $careGiver = CareGiver::where('uid', $giverUid)->first();
+
+        if (!$careGiver) {
+            throw new \InvalidArgumentException('CareGiver not found');
+        }
+
+        $storedPath = $this->uploadFile($filePath);
+        $careGiver->image_url = $storedPath;
+        $careGiver->save();
+
+        return 'Image linked successfully';
     }
 }

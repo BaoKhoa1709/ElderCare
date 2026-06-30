@@ -11,4 +11,5 @@ interface CareGiverService
     public function getAll(): array;
     public function deleteByUid(string $uid): bool;
     public function searchByName(string $name): array;
+    public function linkImageToGiver(string $giverUid, string $filePath): string;
 }

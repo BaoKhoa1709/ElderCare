@@ -6,6 +6,7 @@ use App\Http\Requests\CareGiverStoreRequest;
 use App\Http\Resources\CareGiverResource;
 use App\Services\CareGiverService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class CareGiverController extends Controller
@@ -26,6 +27,23 @@ class CareGiverController extends Controller
             return (new CareGiverResource($careGiverDto))
                 ->response()
                 ->setStatusCode(201);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function linkImage(Request $request): JsonResponse
+    {
+        $giverUid = $request->input('giverUid');
+        $file = $request->file('file');
+
+        if (!$file) {
+            return response()->json(['message' => 'File is required'], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $result = $this->careGiverService->linkImageToGiver($giverUid, $file);
+            return response()->json(['message' => $result], Response::HTTP_OK);
         } catch (\InvalidArgumentException $e) {
             return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
