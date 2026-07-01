@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Dto\LoginUserRequest as LoginUserRequestDto;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ForgotPasswordRequest;
 use App\Http\Requests\LoginUserRequest;
 use App\Http\Resources\UserResource;
 use App\Services\UserService;
@@ -32,5 +33,11 @@ class LoginController extends Controller
             ])
             ->response()
             ->setStatusCode(200);
+    }
+
+    public function forgotPassword(ForgotPasswordRequest $request)
+    {
+        $message = $this->userService->sendResetPasswordEmail($request->email);
+        return response()->json(['message' => $message], Response::HTTP_OK);
     }
 }

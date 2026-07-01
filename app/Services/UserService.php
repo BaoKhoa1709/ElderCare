@@ -10,4 +10,5 @@ interface UserService
 {
     public function register(RegisterUserRequest $request): User;
     public function authenticateUser(LoginUserRequest $request): ?User;
+    public function sendResetPasswordEmail(string $email): string;
 }
