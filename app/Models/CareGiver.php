@@ -50,4 +50,9 @@ class CareGiver extends Model
     {
         return $this->hasMany(CaregiverSchedule::class, 'care_giver_uid', 'uid');
     }
+
+    public function recommendations(): HasMany
+    {
+        return $this->hasMany(AiRecommendation::class, 'care_giver_uid', 'uid');
+    }
 }

@@ -55,4 +55,9 @@ class CareSeeker extends Model
     {
         return $this->healthConditionRecords->pluck('health_condition')->map(fn($v) => HealthCondition::from($v));
     }
+
+    public function recommendations(): HasMany
+    {
+        return $this->hasMany(AiRecommendation::class, 'care_seeker_uid', 'uid');
+    }
 }
