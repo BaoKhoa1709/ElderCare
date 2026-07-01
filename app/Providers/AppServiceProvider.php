@@ -2,18 +2,20 @@
 
 namespace App\Providers;
 
-use App\Services\CareNeedOrSkillsService;
-use App\Services\CareNeedOrSkillsServiceImp;
 use App\Services\CareGiverService;
 use App\Services\CareGiverServiceImp;
+use App\Services\CareNeedOrSkillsService;
+use App\Services\CareNeedOrSkillsServiceImp;
 use App\Services\CareSeekerService;
 use App\Services\CareSeekerServiceImp;
-use App\Services\UserService;
-use App\Services\UserServiceImp;
 use App\Services\CertificationService;
 use App\Services\CertificationServiceImp;
+use App\Services\NotificationService;
+use App\Services\NotificationServiceImp;
 use App\Services\ScheduleService;
 use App\Services\ScheduleServiceImp;
+use App\Services\UserService;
+use App\Services\UserServiceImp;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -26,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CareNeedOrSkillsService::class, CareNeedOrSkillsServiceImp::class);
         $this->app->bind(CertificationService::class, CertificationServiceImp::class);
         $this->app->bind(ScheduleService::class, ScheduleServiceImp::class);
+        $this->app->bind(NotificationService::class, NotificationServiceImp::class);
     }
 
     /**

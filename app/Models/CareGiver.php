@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\Gender;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,7 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class CareGiver extends Model
 {
     protected $primaryKey = 'uid';
+
     protected $keyType = 'string';
+
     public $incrementing = false;
 
     protected $fillable = [
@@ -51,8 +52,8 @@ class CareGiver extends Model
         return $this->hasMany(CaregiverSchedule::class, 'care_giver_uid', 'uid');
     }
 
-    public function recommendations(): HasMany
+    public function notifications(): HasMany
     {
-        return $this->hasMany(AiRecommendation::class, 'care_giver_uid', 'uid');
+        return $this->hasMany(Notification::class, 'care_giver_uid', 'uid');
     }
 }

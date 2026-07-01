@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'openai' => [
+        'key' => env('OPENAI_API_KEY'),
+        'url' => env('OPENAI_API_URL', 'https://api.groq.com/openai/v1/chat/completions'),
+        'model' => env('OPENAI_MODEL', 'llama3-8b-8192'),
+    ],
+
 ];

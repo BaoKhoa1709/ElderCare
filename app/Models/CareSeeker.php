@@ -12,7 +12,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class CareSeeker extends Model
 {
     protected $primaryKey = 'uid';
+
     protected $keyType = 'string';
+
     public $incrementing = false;
 
     protected $fillable = [
@@ -48,16 +50,16 @@ class CareSeeker extends Model
 
     public function getCareNeedsAttribute()
     {
-        return $this->careNeedRecords->pluck('care_need')->map(fn($v) => CareNeed::from($v));
+        return $this->careNeedRecords->pluck('care_need')->map(fn ($v) => CareNeed::from($v));
     }
 
     public function getHealthConditionsAttribute()
     {
-        return $this->healthConditionRecords->pluck('health_condition')->map(fn($v) => HealthCondition::from($v));
+        return $this->healthConditionRecords->pluck('health_condition')->map(fn ($v) => HealthCondition::from($v));
     }
 
-    public function recommendations(): HasMany
+    public function notifications(): HasMany
     {
-        return $this->hasMany(AiRecommendation::class, 'care_seeker_uid', 'uid');
+        return $this->hasMany(Notification::class, 'care_seeker_uid', 'uid');
     }
 }

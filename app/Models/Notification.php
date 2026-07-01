@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class AiRecommendation extends Model
+class Notification extends Model
 {
     protected $fillable = [
         'care_seeker_uid',
