@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\User;
+
 interface NotificationService
 {
     public function getNotifications(string $careSeekerUid): array;

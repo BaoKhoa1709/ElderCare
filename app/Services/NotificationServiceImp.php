@@ -56,7 +56,7 @@ class NotificationServiceImp implements NotificationService
                 $careGiver->user->address
             );
 
-            Log::info("Match points found for care giver " . $careGiver->uid . ": " . $score);
+            Log::info('Match points found for care giver '.$careGiver->uid.': '.$score);
 
             if ($score >= 40) {
                 $matches[] = [
@@ -79,30 +79,30 @@ class NotificationServiceImp implements NotificationService
                 'care_seeker_uid' => $careSeekerUid,
                 'care_giver_uid' => $match['careGiver']->uid,
                 'match_point' => $match['score'],
+                'type' => NotificationType::MATCH_FOUND->value,
+                'message' => "Tìm thấy {$matchCount} CareGiver phù hợp",
             ]);
         }
 
         return $this->getNotifications($careSeekerUid);
     }
 
-    public function getNotificationsForUser(string $userId): array
+    public function getAllForUser(User $user): array
     {
-        $notifications = Notification::where('user_id', $userId)
+        $notifications = Notification::where('user_uid', $user->uid)
             ->orderByDesc('created_at')
+            ->with('careGiver.user')
             ->get();
 
         return $notifications->map(fn ($n) => [
-            'id' => $n->id,
             'message' => $n->message,
             'type' => $n->type?->value ?? null,
+            'createdAt' => $n->created_at,
             'isRead' => $n->is_read,
-            'createdAt' => $n->created_at?->toIso8601String(),
-            'careGiverUid' => $n->care_giver_uid,
-            'careGiverName' => $n->careGiver?->user?->full_name,
-            'matchPoint' => $n->match_point,
+            'careGiverUid' => $n->care_giver_uid ?? null,
+            'careGiverName' => $n->careGiver->user->full_name ?? null,
         ])->all();
     }
-
 
     private function checkAllCriteria(
         array $seekerCareNeeds,

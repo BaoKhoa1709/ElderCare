@@ -12,9 +12,7 @@ return new class extends Migration
             $table->text('message')->nullable()->after('match_point');
             $table->string('type')->nullable()->after('message');
             $table->boolean('is_read')->default(true)->after('type');
-             $table->string('user_uid')->nullable()->after('is_read');
-
-            $table->foreign('user_uid')->references('uid')->on('users')->onDelete('cascade');
+            $table->string('user_uid')->nullable()->after('is_read');
         });
     }
 

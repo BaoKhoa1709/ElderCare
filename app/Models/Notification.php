@@ -15,6 +15,7 @@ class Notification extends Model
         'message',
         'type',
         'is_read',
+        'user_uid',
     ];
 
     public function careSeeker(): BelongsTo
