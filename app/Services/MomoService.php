@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use RuntimeException;
 
 class MomoService
@@ -20,28 +21,28 @@ class MomoService
         $accessKey = $this->accessKey ?: env('MOMO_ACCESS_KEY', '');
         $secretKey = $this->secretKey ?: env('MOMO_SECRET_KEY', '');
 
-        $orderId = (string) $bookingId;
-        $requestId = (string) time();
-        $orderInfo = 'Thanh toan don hang ' . $orderId;
-        $extra = '';
+        $orderId = Str::uuid()->toString();
+        $requestId = Str::uuid()->toString();
+        $orderInfo = 'Thanh toan don hang ' . $bookingId;
+        $extraData = '';
         $ipnUrl = '';
         $redirectUrl = '';
         $requestType = 'captureWallet';
-        $amount = (string) $amount;
+        $amountStr = $this->formatAmount($amount);
 
-        $rawSignature = "accessKey={$accessKey}&amount={$amount}&extraData={$extra}&ipnUrl={$ipnUrl}&orderId={$orderId}&orderInfo={$orderInfo}&partnerCode={$partnerCode}&redirectUrl={$redirectUrl}&requestId={$requestId}&requestType={$requestType}";
+        $rawSignature = "accessKey={$accessKey}&amount={$amountStr}&extraData={$extraData}&ipnUrl={$ipnUrl}&orderId={$orderId}&orderInfo={$orderInfo}&partnerCode={$partnerCode}&redirectUrl={$redirectUrl}&requestId={$requestId}&requestType={$requestType}";
         $signature = hash_hmac('sha256', $rawSignature, $secretKey);
 
-        $response = Http::asForm()->post('https://test-payment.momo.vn/v2/gateway/api/create', [
+        $response = Http::asJson()->post('https://test-payment.momo.vn/v2/gateway/api/create', [
             'partnerCode' => $partnerCode,
             'accessKey' => $accessKey,
             'requestId' => $requestId,
-            'amount' => $amount,
+            'amount' => $amountStr,
             'orderId' => $orderId,
             'orderInfo' => $orderInfo,
             'redirectUrl' => $redirectUrl,
             'ipnUrl' => $ipnUrl,
-            'extraData' => $extra,
+            'extraData' => $extraData,
             'requestType' => $requestType,
             'signature' => $signature,
             'lang' => 'vi',
@@ -56,5 +57,10 @@ class MomoService
         }
 
         return $body['payUrl'];
+    }
+
+    private function formatAmount(string $amount): string
+    {
+        return bcadd((string) $amount, '0', 0);
     }
 }
