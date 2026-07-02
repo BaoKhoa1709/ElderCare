@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Enums\NotificationType;
 use App\Models\CareGiver;
 use App\Models\CareSeeker;
 use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -14,6 +16,7 @@ class NotificationServiceImp implements NotificationService
     public function getNotifications(string $careSeekerUid): array
     {
         return Notification::where('care_seeker_uid', $careSeekerUid)
+            ->whereNotNull('match_point')
             ->with(['careGiver.user'])
             ->get()
             ->map(fn ($n) => [
@@ -24,7 +27,7 @@ class NotificationServiceImp implements NotificationService
             ->all();
     }
 
-    public function generateMatches(string $careSeekerUid): array
+    public function findMatchesForCareSeeker(string $careSeekerUid): array
     {
         $careSeeker = CareSeeker::with(['careNeedRecords', 'healthConditionRecords', 'user'])->where('uid', $careSeekerUid)->first();
 
@@ -39,7 +42,7 @@ class NotificationServiceImp implements NotificationService
 
         $careGivers = CareGiver::with(['skills', 'certifications', 'user'])->get();
 
-        $notifications = [];
+        $matches = [];
 
         foreach ($careGivers as $careGiver) {
             $score = $this->checkAllCriteria(
@@ -56,20 +59,50 @@ class NotificationServiceImp implements NotificationService
             Log::info("Match points found for care giver " . $careGiver->uid . ": " . $score);
 
             if ($score >= 40) {
-                $notifications[] = [
-                    'care_seeker_uid' => $careSeekerUid,
-                    'care_giver_uid' => $careGiver->uid,
-                    'match_point' => $score,
+                $matches[] = [
+                    'careGiver' => $careGiver,
+                    'score' => $score,
                 ];
             }
         }
 
-        foreach ($notifications as $notif) {
-            Notification::create($notif);
+        return $matches;
+    }
+
+    public function generateMatches(string $careSeekerUid): array
+    {
+        $matches = $this->findMatchesForCareSeeker($careSeekerUid);
+        $matchCount = count($matches);
+
+        foreach ($matches as $match) {
+            Notification::create([
+                'care_seeker_uid' => $careSeekerUid,
+                'care_giver_uid' => $match['careGiver']->uid,
+                'match_point' => $match['score'],
+            ]);
         }
 
         return $this->getNotifications($careSeekerUid);
     }
+
+    public function getNotificationsForUser(string $userId): array
+    {
+        $notifications = Notification::where('user_id', $userId)
+            ->orderByDesc('created_at')
+            ->get();
+
+        return $notifications->map(fn ($n) => [
+            'id' => $n->id,
+            'message' => $n->message,
+            'type' => $n->type?->value ?? null,
+            'isRead' => $n->is_read,
+            'createdAt' => $n->created_at?->toIso8601String(),
+            'careGiverUid' => $n->care_giver_uid,
+            'careGiverName' => $n->careGiver?->user?->full_name,
+            'matchPoint' => $n->match_point,
+        ])->all();
+    }
+
 
     private function checkAllCriteria(
         array $seekerCareNeeds,
@@ -98,11 +131,11 @@ class NotificationServiceImp implements NotificationService
             .', giới tính: '.($giverGender ?? 'không rõ')
             .', sống tại: '.($giverAddress ?? 'không rõ').'.';
 
-        Log::info("AI matching prompt: " . $prompt);
+        Log::info('AI matching prompt: '.$prompt);
 
         $response = $this->getAiMatchingResult($prompt);
 
-        Log::info("AI raw response: " . $response);
+        Log::info('AI raw response: '.$response);
 
         if (! $response) {
             return 0;
@@ -155,7 +188,8 @@ class NotificationServiceImp implements NotificationService
 
             return $body['choices'][0]['message']['content'] ?? null;
         } catch (\Exception $e) {
-            Log::error("AI matching error: " . $e->getMessage());
+            Log::error('AI matching error: '.$e->getMessage());
+
             return null;
         }
     }

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [RegisteredUserController::class, 'register']);
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/forgot-password', [LoginController::class, 'forgotPassword']);
+Route::get('/notifications', [NotificationController::class, 'getAll'])->middleware('auth:sanctum');
 Route::get('/notifications/match', [NotificationController::class, 'match'])->middleware('auth:sanctum');
 Route::post('/caregivers', [CareGiverController::class, 'store'])->middleware('auth:sanctum');
 Route::post('/care-seekers', [CareSeekerController::class, 'store'])->middleware('auth:sanctum');

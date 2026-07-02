@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\Role;
 use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,7 +16,7 @@ class NotificationController extends Controller
     public function match(Request $request): JsonResponse
     {
         $user = $request->user();
-        if ($user->role !== Role::SEEKER) {
+        if ($user->role !== \App\Enums\Role::SEEKER) {
             return response()->json(['message' => 'Unauthorized'], Response::HTTP_FORBIDDEN);
         }
 
@@ -33,5 +32,17 @@ class NotificationController extends Controller
         } catch (\InvalidArgumentException $e) {
             return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
+    }
+
+    public function getAll(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        if ($user->role !== Role::SEEKER) {
+            return response()->json(['message' => 'Unauthorized'], Response::HTTP_FORBIDDEN);
+        }
+
+        $notifications = $this->notificationService->getAllForUser($user);
+
+        return response()->json($notifications, Response::HTTP_OK);
     }
 }

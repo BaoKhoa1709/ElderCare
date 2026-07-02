@@ -3,13 +3,20 @@
 namespace App\Services;
 
 use App\Dto\CareSeekerDto;
+use App\Enums\NotificationType;
 use App\Models\CareSeeker;
+use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class CareSeekerServiceImp implements CareSeekerService
 {
+    public function __construct(
+        private NotificationService $notificationService
+    ) {}
+
     public function createCareSeeker(array $data): CareSeekerDto
     {
         $userUid = $data['user_uid'];
@@ -58,6 +65,22 @@ class CareSeekerServiceImp implements CareSeekerService
             return $careSeeker;
         });
 
+        try {
+            $matches = $this->notificationService->findMatchesForCareSeeker($careSeeker->uid);
+
+            if (! empty($matches)) {
+                $message = $this->buildMatchFoundMessage($matches, $user);
+                Notification::create([
+                    'user_id' => $userUid,
+                    'type' => NotificationType::MATCH_FOUND,
+                    'message' => $message,
+                    'is_read' => true,
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to generate matches on CareSeeker creation: '.$e->getMessage());
+        }
+
         $careSeekerWithRelations = CareSeeker::with(['careNeedRecords', 'healthConditionRecords'])
             ->where('uid', $careSeeker->uid)
             ->first();
@@ -67,6 +90,18 @@ class CareSeekerServiceImp implements CareSeekerService
         $careSeekerArray['email'] = $user->email;
 
         return CareSeekerDto::fromArray($careSeekerArray);
+    }
+
+    private function buildMatchFoundMessage(array $matches, User $user): string
+    {
+        $careGiverNames = array_map(fn ($m) => $m['careGiver']->user->full_name ?? 'Unknown', $matches);
+        $count = count($matches);
+
+        if ($count === 1) {
+            return "One care giver matched for {$user->full_name}: ".$careGiverNames[0];
+        }
+
+        return "{$count} care givers matched for {$user->full_name}: ".implode(', ', $careGiverNames);
     }
 
     public function getAll(): array

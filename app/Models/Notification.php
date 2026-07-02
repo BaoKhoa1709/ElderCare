@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\NotificationType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -11,6 +12,9 @@ class Notification extends Model
         'care_seeker_uid',
         'care_giver_uid',
         'match_point',
+        'message',
+        'type',
+        'is_read',
     ];
 
     public function careSeeker(): BelongsTo
@@ -21,5 +25,18 @@ class Notification extends Model
     public function careGiver(): BelongsTo
     {
         return $this->belongsTo(CareGiver::class, 'care_giver_uid', 'uid');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_uid', 'uid');
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'is_read' => 'boolean',
+            'type' => NotificationType::class,
+        ];
     }
 }
