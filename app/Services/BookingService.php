@@ -16,4 +16,6 @@ interface BookingService
     public function updateStatus(int $id, BookingStatus $status): BookingDto;
 
     public function delete(int $id): bool;
+
+    public function decide(int $bookingId, string $type, ?string $meetingLink, User $user): string;
 }

@@ -94,4 +94,32 @@ class BookingController extends Controller
 
         return response()->json(null, Response::HTTP_NO_CONTENT);
     }
+
+    public function decide(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'id' => 'required|integer|exists:bookings,id',
+            'type' => 'required|string|in:PENDING,CONFIRMED,COMPLETED,CANCELED',
+            'meeting_link' => 'nullable|url',
+        ]);
+
+        $user = $request->user();
+
+        if (! $user) {
+            return response()->json(['message' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        try {
+            $message = $this->bookingService->decide(
+                (int) $data['id'],
+                $data['type'],
+                $data['meeting_link'] ?? null,
+                $user
+            );
+
+            return response()->json(['message' => $message], Response::HTTP_OK);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+    }
 }

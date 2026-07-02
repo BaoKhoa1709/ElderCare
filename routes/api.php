@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CareGiverController;
 use App\Http\Controllers\CareSeekerController;
+use App\Http\Controllers\MomoController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,4 +26,6 @@ Route::post('/booking', [BookingController::class, 'store'])->middleware('auth:s
 Route::get('/booking/getById/{id}', [BookingController::class, 'getById']);
 Route::get('/booking/getAll', [BookingController::class, 'getAll']);
 Route::post('/booking/updateStatus', [BookingController::class, 'updateStatus'])->middleware('auth:sanctum');
+Route::post('/booking/decide', [BookingController::class, 'decide'])->middleware('auth:sanctum');
 Route::delete('/booking/{id}', [BookingController::class, 'delete'])->middleware('auth:sanctum');
+Route::get('/test-momo', [MomoController::class, 'testMomoPayment']);

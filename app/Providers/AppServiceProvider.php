@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Services\BookingService;
+use App\Services\BookingServiceImp;
 use App\Services\CareGiverService;
 use App\Services\CareGiverServiceImp;
 use App\Services\CareNeedOrSkillsService;
@@ -22,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->bind(BookingService::class, BookingServiceImp::class);
         $this->app->bind(UserService::class, UserServiceImp::class);
         $this->app->bind(CareGiverService::class, CareGiverServiceImp::class);
         $this->app->bind(CareSeekerService::class, CareSeekerServiceImp::class);
