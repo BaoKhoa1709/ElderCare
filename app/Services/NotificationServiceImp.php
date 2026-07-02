@@ -7,6 +7,7 @@ use App\Models\CareSeeker;
 use App\Models\Notification;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class NotificationServiceImp implements NotificationService
 {
@@ -52,6 +53,8 @@ class NotificationServiceImp implements NotificationService
                 $careGiver->user->address
             );
 
+            Log::info("Match points found for care giver " . $careGiver->uid . ": " . $score);
+
             if ($score >= 40) {
                 $notifications[] = [
                     'care_seeker_uid' => $careSeekerUid,
@@ -95,7 +98,11 @@ class NotificationServiceImp implements NotificationService
             .', giới tính: '.($giverGender ?? 'không rõ')
             .', sống tại: '.($giverAddress ?? 'không rõ').'.';
 
+        Log::info("AI matching prompt: " . $prompt);
+
         $response = $this->getAiMatchingResult($prompt);
+
+        Log::info("AI raw response: " . $response);
 
         if (! $response) {
             return 0;
@@ -148,6 +155,7 @@ class NotificationServiceImp implements NotificationService
 
             return $body['choices'][0]['message']['content'] ?? null;
         } catch (\Exception $e) {
+            Log::error("AI matching error: " . $e->getMessage());
             return null;
         }
     }
