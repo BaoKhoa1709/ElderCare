@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Dto\NotificationsDto;
 use App\Enums\NotificationType;
+use App\Enums\Role;
 use App\Models\CareGiver;
 use App\Models\CareSeeker;
 use App\Models\Notification;
@@ -81,6 +83,7 @@ class NotificationServiceImp implements NotificationService
                 'match_point' => $match['score'],
                 'type' => NotificationType::MATCH_FOUND->value,
                 'message' => "Tìm thấy {$matchCount} CareGiver phù hợp",
+                'is_read' => false,
             ]);
         }
 
@@ -91,17 +94,94 @@ class NotificationServiceImp implements NotificationService
     {
         $notifications = Notification::where('user_uid', $user->uid)
             ->orderByDesc('created_at')
-            ->with('careGiver.user')
+            ->with(['careGiver.user'])
             ->get();
 
-        return $notifications->map(fn ($n) => [
-            'message' => $n->message,
-            'type' => $n->type?->value ?? null,
-            'createdAt' => $n->created_at,
-            'isRead' => $n->is_read,
-            'careGiverUid' => $n->care_giver_uid ?? null,
-            'careGiverName' => $n->careGiver->user->full_name ?? null,
-        ])->all();
+        return $notifications->map(fn ($n) => $this->buildNotificationByType($n, $user)->toArray())->all();
+    }
+
+    private function buildNotificationByType(Notification $n, User $user): NotificationsDto
+    {
+        $createdAt = $n->created_at?->toIso8601String();
+
+        return match ($n->type->value) {
+            NotificationType::MATCH_FOUND->value => $this->buildMatchFound($n, $user),
+            NotificationType::BOOKING_CONFIRMED->value => NotificationsDto::fromType(
+                NotificationType::BOOKING_CONFIRMED->value,
+                'Lịch hẹn của bạn đã được xác nhận.',
+                $n->id,
+                $n->is_read,
+                $createdAt
+            ),
+            NotificationType::BOOKING_CANCELED->value => NotificationsDto::fromType(
+                NotificationType::BOOKING_CANCELED->value,
+                'Lịch hẹn của bạn đã bị hủy.',
+                $n->id,
+                $n->is_read,
+                $createdAt
+            ),
+            NotificationType::NEW_MESSAGE->value => NotificationsDto::fromType(
+                NotificationType::NEW_MESSAGE->value,
+                'Bạn có tin nhắn mới.',
+                $n->id,
+                $n->is_read,
+                $createdAt
+            ),
+            NotificationType::REVIEW_RECEIVED->value => NotificationsDto::fromType(
+                NotificationType::REVIEW_RECEIVED->value,
+                'Bạn vừa nhận được đánh giá từ người dùng.',
+                $n->id,
+                $n->is_read,
+                $createdAt
+            ),
+            NotificationType::PAYMENT_RECEIVED->value => NotificationsDto::fromType(
+                NotificationType::PAYMENT_RECEIVED->value,
+                'Bạn đã nhận được một khoản thanh toán.',
+                $n->id,
+                $n->is_read,
+                $createdAt
+            ),
+            NotificationType::TRAINING_AVAILABLE->value => NotificationsDto::fromType(
+                NotificationType::TRAINING_AVAILABLE->value,
+                'Một khóa đào tạo mới đang sẵn có cho bạn.',
+                $n->id,
+                $n->is_read,
+                $createdAt
+            ),
+            default => NotificationsDto::fromType(
+                $n->type?->value ?? 'UNKNOWN',
+                'Thông báo không xác định',
+                $n->id,
+                $n->is_read,
+                $createdAt
+            ),
+        };
+    }
+
+    private function buildMatchFound(Notification $n, User $user): NotificationsDto
+    {
+        $createdAt = $n->created_at?->toIso8601String();
+
+        if ($user->role === Role::SEEKER && $n->care_seeker_uid === $user->uid) {
+            $careGiver = CareGiver::where('uid', $n->care_giver_uid)->with('user')->first();
+
+            if ($careGiver) {
+                return NotificationsDto::fromMatch(
+                    $careGiver,
+                    $n->id,
+                    $n->is_read,
+                    $createdAt
+                );
+            }
+        }
+
+        return NotificationsDto::fromType(
+            NotificationType::MATCH_FOUND->value,
+            'Tìm thấy CareGiver phù hợp cho bạn',
+            $n->id,
+            $n->is_read,
+            $createdAt
+        );
     }
 
     private function checkAllCriteria(
