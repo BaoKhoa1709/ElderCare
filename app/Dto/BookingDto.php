@@ -5,7 +5,7 @@ namespace App\Dto;
 class BookingDto
 {
     public function __construct(
-        public string $uid,
+        public int $id,
         public string $careLocation,
         public ?string $fromDate,
         public int $duration,
@@ -22,7 +22,7 @@ class BookingDto
     public static function fromArray(array $data): self
     {
         return new self(
-            uid: $data['uid'],
+            id: $data['id'],
             careLocation: $data['care_location'],
             fromDate: $data['from_date'] ?? null,
             duration: $data['duration'],

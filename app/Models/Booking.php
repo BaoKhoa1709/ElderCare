@@ -10,14 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Booking extends Model
 {
-    protected $primaryKey = 'uid';
-
-    protected $keyType = 'string';
-
-    public $incrementing = false;
-
     protected $fillable = [
-        'uid',
         'care_location',
         'from_date',
         'duration',

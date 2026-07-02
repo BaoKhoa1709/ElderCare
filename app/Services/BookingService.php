@@ -9,11 +9,11 @@ interface BookingService
 {
     public function create(array $data): BookingDto;
 
-    public function getByUid(string $uid): ?BookingDto;
+    public function getById(int $id): ?BookingDto;
 
     public function getAll(): array;
 
-    public function updateStatus(string $uid, BookingStatus $status): BookingDto;
+    public function updateStatus(int $id, BookingStatus $status): BookingDto;
 
-    public function delete(string $uid): bool;
+    public function delete(int $id): bool;
 }

@@ -44,9 +44,9 @@ class BookingController extends Controller
         }
     }
 
-    public function getByUid(string $uid): JsonResponse
+    public function getById(int $id): JsonResponse
     {
-        $bookingDto = $this->bookingService->getByUid($uid);
+        $bookingDto = $this->bookingService->getById($id);
 
         if (! $bookingDto) {
             return response()->json(['message' => 'Booking not found'], Response::HTTP_NOT_FOUND);
@@ -69,12 +69,12 @@ class BookingController extends Controller
     public function updateStatus(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'uid' => 'required|string|exists:bookings,uid',
+            'id' => 'required|integer|exists:bookings,id',
             'status' => 'required|string|in:PENDING,CONFIRMED,COMPLETED,CANCELED',
         ]);
 
         try {
-            $bookingDto = $this->bookingService->updateStatus($data['uid'], BookingStatus::from($data['status']));
+            $bookingDto = $this->bookingService->updateStatus((int) $data['id'], BookingStatus::from($data['status']));
 
             return (new BookingResource($bookingDto))
                 ->response()
@@ -84,9 +84,9 @@ class BookingController extends Controller
         }
     }
 
-    public function delete(string $uid): JsonResponse
+    public function delete(int $id): JsonResponse
     {
-        $result = $this->bookingService->delete($uid);
+        $result = $this->bookingService->delete($id);
 
         if (! $result) {
             return response()->json(['message' => 'Booking not found'], Response::HTTP_NOT_FOUND);

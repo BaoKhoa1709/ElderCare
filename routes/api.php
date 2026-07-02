@@ -22,7 +22,7 @@ Route::post('/caregivers/updateCareNeedOrSkills', [CareGiverController::class, '
 Route::post('/caregivers/updateCertifications', [CareGiverController::class, 'updateCertifications']);
 Route::post('/caregivers/updateSchedule', [CareGiverController::class, 'updateSchedule']);
 Route::post('/booking', [BookingController::class, 'store'])->middleware('auth:sanctum');
-Route::get('/booking/getByUid/{uid}', [BookingController::class, 'getByUid']);
+Route::get('/booking/getById/{id}', [BookingController::class, 'getById']);
 Route::get('/booking/getAll', [BookingController::class, 'getAll']);
 Route::post('/booking/updateStatus', [BookingController::class, 'updateStatus'])->middleware('auth:sanctum');
-Route::delete('/booking/{uid}', [BookingController::class, 'delete'])->middleware('auth:sanctum');
+Route::delete('/booking/{id}', [BookingController::class, 'delete'])->middleware('auth:sanctum');
