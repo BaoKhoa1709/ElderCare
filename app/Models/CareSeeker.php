@@ -62,4 +62,9 @@ class CareSeeker extends Model
     {
         return $this->hasMany(Notification::class, 'care_seeker_uid', 'uid');
     }
+
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class, 'care_seeker_uid', 'uid');
+    }
 }
