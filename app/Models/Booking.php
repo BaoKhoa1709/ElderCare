@@ -7,6 +7,7 @@ use App\Enums\CareLocation;
 use App\Enums\Payment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Booking extends Model
 {
@@ -44,5 +45,10 @@ class Booking extends Model
     public function careGiver(): BelongsTo
     {
         return $this->belongsTo(CareGiver::class, 'care_giver_uid', 'uid');
+    }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
     }
 }

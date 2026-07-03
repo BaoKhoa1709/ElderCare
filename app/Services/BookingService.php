@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Dto\BookingDto;
 use App\Enums\BookingStatus;
+use App\Models\User;
 
 interface BookingService
 {
@@ -11,7 +12,7 @@ interface BookingService
 
     public function getById(int $id): ?BookingDto;
 
-    public function getAll(): array;
+    public function getAllByRole(User $user): array;
 
     public function updateStatus(int $id, BookingStatus $status): BookingDto;
 

@@ -22,6 +22,13 @@ class BookingResource extends JsonResource
             'note' => $this->note,
             'meetingLink' => $this->meetingLink,
             'payment' => $this->payment,
+            'type' => $this->type,
+            'careGiverName' => $this->careGiverName,
+            'careGiverEmail' => $this->careGiverEmail,
+            'careGiverPhone' => $this->careGiverPhone,
+            'careSeekerName' => $this->careSeekerName,
+            'careSeekerEmail' => $this->careSeekerEmail,
+            'careSeekerPhone' => $this->careSeekerPhone,
         ];
     }
 }

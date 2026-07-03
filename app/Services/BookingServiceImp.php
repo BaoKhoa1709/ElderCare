@@ -12,6 +12,7 @@ use App\Models\CareGiver;
 use App\Models\CareSeeker;
 use App\Models\Notification;
 use App\Models\User;
+use App\Services\MomoService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
@@ -42,7 +43,7 @@ class BookingServiceImp implements BookingService
 
     public function getById(int $id): ?BookingDto
     {
-        $booking = Booking::with(['careSeeker', 'careGiver'])->where('id', $id)->first();
+        $booking = Booking::with(['careSeeker.user', 'careGiver.user'])->where('id', $id)->first();
 
         if (! $booking) {
             return null;
@@ -51,9 +52,19 @@ class BookingServiceImp implements BookingService
         return BookingDto::fromArray($booking->toArray());
     }
 
-    public function getAll(): array
+    public function getAllByRole(User $user): array
     {
-        return Booking::all()->map(fn ($b) => BookingDto::fromArray($b->toArray()))->all();
+        $query = Booking::with(['careSeeker.user', 'careGiver.user']);
+
+        if ($user->role === Role::ADMIN->value) {
+            return $query->get()->map(fn ($b) => BookingDto::fromArray($b->toArray()))->all();
+        }
+
+        if ($user->role === Role::GIVER->value) {
+            return $query->where('care_giver_uid', $user->uid)->get()->map(fn ($b) => BookingDto::fromArray($b->toArray()))->all();
+        }
+
+        return $query->where('care_seeker_uid', $user->uid)->get()->map(fn ($b) => BookingDto::fromArray($b->toArray()))->all();
     }
 
     public function updateStatus(int $id, BookingStatus $status): BookingDto

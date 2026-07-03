@@ -29,6 +29,7 @@ class BookingController extends Controller
             'note' => 'nullable|string',
             'meeting_link' => 'nullable|url',
             'payment' => 'required|string|in:ONLINE,ON_SITE',
+            'type' => 'nullable|string|in:NEW_MESSAGE,MATCH_FOUND,BOOKING_PENDING,BOOKING_CONFIRMED,BOOKING_COMPLETED,BOOKING_CANCELED,REVIEW_RECEIVED,PAYMENT_RECEIVED,TRAINING_AVAILABLE',
         ]);
 
         $data['status'] = $data['status'] ?? 'PENDING';
@@ -57,10 +58,15 @@ class BookingController extends Controller
             ->setStatusCode(200);
     }
 
-    public function getAll(): JsonResponse
+    public function getAll(Request $request): JsonResponse
     {
-        $bookings = $this->bookingService->getAll();
+        $user = $request->user();
 
+        if (! $user) {
+            return response()->json(['message' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $bookings = $this->bookingService->getAllByRole($user);
         return BookingResource::collection($bookings)
             ->response()
             ->setStatusCode(200);
