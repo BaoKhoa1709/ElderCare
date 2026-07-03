@@ -19,7 +19,7 @@ class BookingController extends Controller
     {
         $data = $request->validate([
             'care_location' => 'required|string|in:CLINIC,AT_HOME',
-            'from_date' => 'required|date|after_or_equal:today',
+            'from_date' => 'required|date',
             'duration' => 'required|integer|min:1',
             'status' => 'nullable|string|in:PENDING,CONFIRMED,COMPLETED,CANCELED',
             'start_time' => 'nullable|date_format:H:i:s',

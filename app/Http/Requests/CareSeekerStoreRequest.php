@@ -21,7 +21,7 @@ class CareSeekerStoreRequest extends FormRequest
 
         return [
             'dob' => ['nullable', 'date'],
-            'phone_number' => ['nullable', 'string', 'max:255'],
+            'phone_number' => ['required', 'string', 'max:255', 'regex:/^(\+84|0)\d{9}$/'],
             'preferred_giver_gender' => ['nullable', 'string'],
             'care_needs' => ['nullable', 'array'],
             'care_needs.*' => ['required', 'string', Rule::in($careNeedValues)],
