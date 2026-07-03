@@ -8,6 +8,7 @@ use App\Enums\Payment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class Booking extends Model
 {
@@ -55,5 +56,12 @@ class Booking extends Model
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
+    }
+
+    public static function getGiverUsersForSeeker(string $seekerUid): Collection
+    {
+        return User::whereHas('careGiver.bookings', function ($query) use ($seekerUid) {
+            $query->where('care_seeker_uid', $seekerUid);
+        })->get();
     }
 }

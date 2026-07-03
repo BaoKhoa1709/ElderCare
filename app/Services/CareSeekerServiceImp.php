@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Dto\CareSeekerDto;
 use App\Enums\NotificationType;
+use App\Enums\Role;
+use App\Models\Booking;
 use App\Models\CareSeeker;
 use App\Models\Notification;
 use App\Models\User;
@@ -109,15 +111,30 @@ class CareSeekerServiceImp implements CareSeekerService
         return CareSeeker::all()->map(fn ($cs) => CareSeekerDto::fromArray($cs->toArray()))->all();
     }
 
-    public function getById(string $uid): ?CareSeekerDto
+    public function getById(User $authUser, string $seekerUid): CareSeekerDto
     {
-        $careSeeker = CareSeeker::with(['careNeedRecords', 'healthConditionRecords'])->where('uid', $uid)->first();
+        $careSeeker = CareSeeker::with(['careNeedRecords', 'healthConditionRecords'])->where('uid', $seekerUid)->first();
 
         if (! $careSeeker) {
-            return null;
+            throw new \InvalidArgumentException('CareSeeker not found');
         }
 
-        return CareSeekerDto::fromArray($careSeeker->toArray());
+        $isAdmin = $authUser->role === Role::ADMIN;
+        $isSeekerOwner = $authUser->careSeeker && $authUser->careSeeker->uid === $seekerUid;
+        $hasBooking = Booking::where('care_seeker_uid', $seekerUid)
+            ->where('care_giver_uid', $authUser->uid)
+            ->exists();
+
+        if (! $isAdmin && ! $isSeekerOwner && ! $hasBooking) {
+            throw new \InvalidArgumentException('Unauthorized');
+        }
+
+        $careSeeker->load('user');
+        $careSeekerArray = $careSeeker->toArray();
+        $careSeekerArray['full_name'] = $careSeeker->user->full_name ?? null;
+        $careSeekerArray['email'] = $careSeeker->user->email ?? null;
+
+        return CareSeekerDto::fromArray($careSeekerArray);
     }
 
     public function deleteById(string $uid): bool

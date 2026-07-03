@@ -46,4 +46,17 @@ class NotificationController extends Controller
 
         return response()->json($notifications, Response::HTTP_OK);
     }
+
+    public function requestEmergency(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        try {
+            $result = $this->notificationService->requestEmergency($user);
+
+            return response()->json($result, Response::HTTP_OK);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+    }
 }

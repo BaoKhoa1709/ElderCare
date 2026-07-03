@@ -100,6 +100,39 @@ class NotificationServiceImp implements NotificationService
         return $notifications->map(fn ($n) => $this->buildNotificationByType($n, $user)->toArray())->all();
     }
 
+    public function requestEmergency(User $authUser): array
+    {
+        if ($authUser->role !== Role::SEEKER) {
+            throw new \InvalidArgumentException('Only SEEKER can request emergency');
+        }
+
+        $careSeeker = $authUser->careSeeker;
+        if (! $careSeeker) {
+            throw new \InvalidArgumentException('CareSeeker profile not found');
+        }
+
+        $giverUsers = Booking::getGiverUsersForSeeker($careSeeker->uid);
+
+        if ($giverUsers->isEmpty()) {
+            throw new \InvalidArgumentException('No caregivers found for this seeker.');
+        }
+
+        foreach ($giverUsers as $giverUser) {
+            Notification::create([
+                'user_uid' => $giverUser->uid,
+                'message' => 'Urgent request from '.$authUser->full_name,
+                'type' => NotificationType::NEW_MESSAGE->value,
+                'is_read' => false,
+            ]);
+        }
+
+        return [
+            'status' => 'success',
+            'message' => 'Emergency notification sent to '.count($giverUsers).' caregivers',
+            'timestamp' => now()->toIso8601String(),
+        ];
+    }
+
     private function buildNotificationByType(Notification $n, User $user): NotificationsDto
     {
         $createdAt = $n->created_at?->toIso8601String();
