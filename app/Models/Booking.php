@@ -51,4 +51,9 @@ class Booking extends Model
     {
         return $this->hasMany(Task::class);
     }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
 }

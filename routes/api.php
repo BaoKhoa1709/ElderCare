@@ -7,6 +7,7 @@ use App\Http\Controllers\CareGiverController;
 use App\Http\Controllers\CareSeekerController;
 use App\Http\Controllers\MomoController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 
@@ -37,3 +38,7 @@ Route::get('/tasks', [TaskController::class, 'getAll'])->middleware('auth:sanctu
 Route::get('/tasks/by-booking/{bookingId}', [TaskController::class, 'getAllByBooking'])->middleware('auth:sanctum');
 Route::put('/tasks/{taskId}', [TaskController::class, 'update'])->middleware('auth:sanctum');
 Route::delete('/tasks/{taskId}', [TaskController::class, 'delete'])->middleware('auth:sanctum');
+Route::post('/reviews/create', [ReviewController::class, 'create'])->middleware('auth:sanctum');
+Route::get('/reviews/getByGiverId/{careGiverUid}', [ReviewController::class, 'getByCareGiverUid']);
+Route::put('/reviews/updateByReviewId/{reviewId}', [ReviewController::class, 'update'])->middleware('auth:sanctum');
+Route::delete('/reviews/deleteById/{reviewId}', [ReviewController::class, 'delete'])->middleware('auth:sanctum');
