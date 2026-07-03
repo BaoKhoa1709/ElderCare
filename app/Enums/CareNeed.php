@@ -1,0 +1,18 @@
+<?php
+
+namespace App\Enums;
+
+enum CareNeed: string
+{
+    case HO_TRO_TAM_RUA = 'HO_TRO_TAM_RUA';
+    case NHAC_UONG_THUOC = 'NHAC_UONG_THUOC';
+    case CHUAN_BI_BUA_AN = 'CHUAN_BI_BUA_AN';
+    case DONG_HANH_TRO_CHUYEN = 'DONG_HANH_TRO_CHUYEN';
+    case HO_TRO_DI_CHUYEN = 'HO_TRO_DI_CHUYEN';
+    case GIAM_SAT_SUC_KHOE = 'GIAM_SAT_SUC_KHOE';
+    case HO_TRO_VE_TAM_LY = 'HO_TRO_VE_TAM_LY';
+    case HO_TRO_VAN_DONG = 'HO_TRO_VAN_DONG';
+    case CHAM_SOC_BAN_DEM = 'CHAM_SOC_BAN_DEM';
+    case CHAM_SOC_VET_THUONG = 'CHAM_SOC_VET_THUONG';
+    case GIUP_DO_NHA_CUA = 'GIUP_DO_NHA_CUA';
+}

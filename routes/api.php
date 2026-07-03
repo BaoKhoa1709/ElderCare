@@ -1,0 +1,49 @@
+<?php
+
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\BookingController;
+use App\Http\Controllers\CareGiverController;
+use App\Http\Controllers\CareSeekerController;
+use App\Http\Controllers\MomoController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\TaskController;
+use Illuminate\Support\Facades\Route;
+
+Route::post('/register', [RegisteredUserController::class, 'register']);
+Route::post('/login', [LoginController::class, 'login']);
+Route::post('/forgot-password', [LoginController::class, 'forgotPassword']);
+Route::get('/notifications', [NotificationController::class, 'getAll'])->middleware('auth:sanctum');
+Route::get('/notifications/match', [NotificationController::class, 'match'])->middleware('auth:sanctum');
+Route::post('/caregivers', [CareGiverController::class, 'store'])->middleware('auth:sanctum');
+Route::post('/care-seekers', [CareSeekerController::class, 'store'])->middleware('auth:sanctum');
+Route::get('/care-seekers/getAll', [CareSeekerController::class, 'getAll'])->middleware('auth:sanctum');
+Route::get('/care-seekers/getById/{uid}', [CareSeekerController::class, 'getById'])->middleware('auth:sanctum');
+Route::delete('/care-seekers/deleteById/{uid}', [CareSeekerController::class, 'deleteById'])->middleware('auth:sanctum');
+Route::post('/caregivers/linkImage', [CareGiverController::class, 'linkImage'])->middleware('auth:sanctum');
+Route::get('/caregivers/getByUid/{uid}', [CareGiverController::class, 'getByUid']);
+Route::get('/caregivers/getAll', [CareGiverController::class, 'getAll']);
+Route::get('/caregivers/searchByName', [CareGiverController::class, 'searchByName'])->middleware('auth:sanctum');
+Route::post('/caregivers/updateCareNeedOrSkills', [CareGiverController::class, 'updateCareNeedOrSkills']);
+Route::post('/caregivers/updateCertifications', [CareGiverController::class, 'updateCertifications']);
+Route::post('/caregivers/updateSchedule', [CareGiverController::class, 'updateSchedule']);
+Route::post('/booking', [BookingController::class, 'store'])->middleware('auth:sanctum');
+Route::get('/booking/getById/{id}', [BookingController::class, 'getById']);
+Route::get('/booking/getAll', [BookingController::class, 'getAll'])->middleware('auth:sanctum');
+Route::post('/booking/updateStatus', [BookingController::class, 'updateStatus'])->middleware('auth:sanctum');
+Route::post('/booking/decide', [BookingController::class, 'decide'])->middleware('auth:sanctum');
+Route::delete('/booking/{id}', [BookingController::class, 'delete'])->middleware('auth:sanctum');
+Route::get('/test-momo', [MomoController::class, 'testMomoPayment']);
+
+Route::post('/tasks', [TaskController::class, 'create'])->middleware('auth:sanctum');
+Route::get('/tasks/{taskId}', [TaskController::class, 'getById']);
+Route::get('/tasks', [TaskController::class, 'getAll'])->middleware('auth:sanctum');
+Route::get('/tasks/by-booking/{bookingId}', [TaskController::class, 'getAllByBooking'])->middleware('auth:sanctum');
+Route::put('/tasks/{taskId}', [TaskController::class, 'update'])->middleware('auth:sanctum');
+Route::delete('/tasks/{taskId}', [TaskController::class, 'delete'])->middleware('auth:sanctum');
+Route::post('/reviews/create', [ReviewController::class, 'create'])->middleware('auth:sanctum');
+Route::post('/notification/emergency', [NotificationController::class, 'requestEmergency'])->middleware('auth:sanctum');
+Route::get('/reviews/getByGiverId/{careGiverUid}', [ReviewController::class, 'getByCareGiverUid']);
+Route::put('/reviews/updateByReviewId/{reviewId}', [ReviewController::class, 'update'])->middleware('auth:sanctum');
+Route::delete('/reviews/deleteById/{reviewId}', [ReviewController::class, 'delete'])->middleware('auth:sanctum');
