@@ -3,11 +3,13 @@
 namespace App\Services;
 
 use App\Dto\CareGiverDto;
+use App\Dto\PageableDto;
 use App\Models\CareGiver;
-use App\Models\CareGiverSkill;
 use App\Models\CaregiverCertification;
 use App\Models\CaregiverSchedule;
+use App\Models\CareGiverSkill;
 use App\Models\User;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -30,11 +32,11 @@ class CareGiverServiceImp implements CareGiverService
         }
 
         $user = User::where('uid', $userUid)->first();
-        if (!$user) {
+        if (! $user) {
             throw new \InvalidArgumentException('User not found');
         }
 
-        $careGiver = DB::transaction(function () use ($data, $user) {
+        $careGiver = DB::transaction(function () use ($data) {
             $careGiver = CareGiver::create([
                 'uid' => (string) Str::uuid(),
                 'user_uid' => $data['user_uid'],
@@ -46,7 +48,7 @@ class CareGiverServiceImp implements CareGiverService
                 'image_url' => $data['image_url'] ?? null,
             ]);
 
-            if (!empty($data['skills'])) {
+            if (! empty($data['skills'])) {
                 foreach ($data['skills'] as $skill) {
                     CareGiverSkill::create([
                         'care_giver_uid' => $careGiver->uid,
@@ -55,7 +57,7 @@ class CareGiverServiceImp implements CareGiverService
                 }
             }
 
-            if (!empty($data['certifications'])) {
+            if (! empty($data['certifications'])) {
                 foreach ($data['certifications'] as $cert) {
                     CaregiverCertification::create([
                         'care_giver_uid' => $careGiver->uid,
@@ -67,7 +69,7 @@ class CareGiverServiceImp implements CareGiverService
                 }
             }
 
-            if (!empty($data['schedules'])) {
+            if (! empty($data['schedules'])) {
                 foreach ($data['schedules'] as $schedule) {
                     CaregiverSchedule::create([
                         'care_giver_uid' => $careGiver->uid,
@@ -96,7 +98,7 @@ class CareGiverServiceImp implements CareGiverService
     {
         $careGiver = CareGiver::with(['skills', 'certifications', 'schedules'])->where('uid', $uid)->first();
 
-        if (!$careGiver) {
+        if (! $careGiver) {
             return null;
         }
 
@@ -105,14 +107,14 @@ class CareGiverServiceImp implements CareGiverService
 
     public function getAll(): array
     {
-        return CareGiver::all()->map(fn($cg) => CareGiverDto::fromArray($cg->toArray()))->all();
+        return CareGiver::all()->map(fn ($cg) => CareGiverDto::fromArray($cg->toArray()))->all();
     }
 
     public function deleteByUid(string $uid): bool
     {
         $careGiver = CareGiver::where('uid', $uid)->first();
 
-        if (!$careGiver) {
+        if (! $careGiver) {
             return false;
         }
 
@@ -132,6 +134,25 @@ class CareGiverServiceImp implements CareGiverService
         })->all();
     }
 
+    public function searchByNamePaginated(string $name, PageableDto $pageable): LengthAwarePaginator
+    {
+        $paginator = CareGiver::with(['skills', 'certifications', 'user'])
+            ->whereHas('user', fn ($q) => $q->where('full_name', 'like', "%{$name}%"))
+            ->paginate($pageable->getPageSize(), ['*'], 'page', $pageable->getPageNumber());
+
+        $transformed = $paginator->getCollection()->map(function ($careGiver) {
+            $data = $careGiver->toArray();
+            if ($careGiver->user) {
+                $data['full_name'] = $careGiver->user->full_name;
+                $data['email'] = $careGiver->user->email;
+            }
+
+            return CareGiverDto::fromArray($data);
+        });
+
+        return $paginator->setCollection($transformed);
+    }
+
     public function uploadFile(string $tempPath): string
     {
         return Storage::disk('public')->putFile('caregivers', $tempPath);
@@ -141,7 +162,7 @@ class CareGiverServiceImp implements CareGiverService
     {
         $careGiver = CareGiver::where('uid', $giverUid)->first();
 
-        if (!$careGiver) {
+        if (! $careGiver) {
             throw new \InvalidArgumentException('CareGiver not found');
         }
 

@@ -18,9 +18,13 @@ Route::get('/notifications', [NotificationController::class, 'getAll'])->middlew
 Route::get('/notifications/match', [NotificationController::class, 'match'])->middleware('auth:sanctum');
 Route::post('/caregivers', [CareGiverController::class, 'store'])->middleware('auth:sanctum');
 Route::post('/care-seekers', [CareSeekerController::class, 'store'])->middleware('auth:sanctum');
+Route::get('/care-seekers/getAll', [CareSeekerController::class, 'getAll'])->middleware('auth:sanctum');
+Route::get('/care-seekers/getById/{uid}', [CareSeekerController::class, 'getById'])->middleware('auth:sanctum');
+Route::delete('/care-seekers/deleteById/{uid}', [CareSeekerController::class, 'deleteById'])->middleware('auth:sanctum');
 Route::post('/caregivers/linkImage', [CareGiverController::class, 'linkImage'])->middleware('auth:sanctum');
 Route::get('/caregivers/getByUid/{uid}', [CareGiverController::class, 'getByUid']);
 Route::get('/caregivers/getAll', [CareGiverController::class, 'getAll']);
+Route::get('/caregivers/searchByName', [CareGiverController::class, 'searchByName'])->middleware('auth:sanctum');
 Route::post('/caregivers/updateCareNeedOrSkills', [CareGiverController::class, 'updateCareNeedOrSkills']);
 Route::post('/caregivers/updateCertifications', [CareGiverController::class, 'updateCertifications']);
 Route::post('/caregivers/updateSchedule', [CareGiverController::class, 'updateSchedule']);
@@ -39,6 +43,7 @@ Route::get('/tasks/by-booking/{bookingId}', [TaskController::class, 'getAllByBoo
 Route::put('/tasks/{taskId}', [TaskController::class, 'update'])->middleware('auth:sanctum');
 Route::delete('/tasks/{taskId}', [TaskController::class, 'delete'])->middleware('auth:sanctum');
 Route::post('/reviews/create', [ReviewController::class, 'create'])->middleware('auth:sanctum');
+Route::post('/notification/emergency', [NotificationController::class, 'requestEmergency'])->middleware('auth:sanctum');
 Route::get('/reviews/getByGiverId/{careGiverUid}', [ReviewController::class, 'getByCareGiverUid']);
 Route::put('/reviews/updateByReviewId/{reviewId}', [ReviewController::class, 'update'])->middleware('auth:sanctum');
 Route::delete('/reviews/deleteById/{reviewId}', [ReviewController::class, 'delete'])->middleware('auth:sanctum');

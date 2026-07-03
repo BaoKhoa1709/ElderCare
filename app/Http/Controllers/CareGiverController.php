@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Dto\CareNeedOrSkillsDto;
+use App\Dto\PageableDto;
+use App\Dto\ScheduleDto;
 use App\Http\Requests\CareGiverStoreRequest;
 use App\Http\Resources\CareGiverResource;
-use App\Services\CareNeedOrSkillsService;
 use App\Services\CareGiverService;
+use App\Services\CareNeedOrSkillsService;
 use App\Services\CertificationService;
 use App\Services\ScheduleService;
 use Illuminate\Http\JsonResponse;
@@ -19,8 +22,7 @@ class CareGiverController extends Controller
         private CareNeedOrSkillsService $careNeedOrSkillsService,
         private CertificationService $certificationService,
         private ScheduleService $scheduleService
-    ) {
-    }
+    ) {}
 
     public function store(CareGiverStoreRequest $request): JsonResponse
     {
@@ -44,12 +46,13 @@ class CareGiverController extends Controller
         $giverUid = $request->input('giverUid');
         $file = $request->file('file');
 
-        if (!$file) {
+        if (! $file) {
             return response()->json(['message' => 'File is required'], Response::HTTP_BAD_REQUEST);
         }
 
         try {
             $result = $this->careGiverService->linkImageToGiver($giverUid, $file);
+
             return response()->json(['message' => $result], Response::HTTP_OK);
         } catch (\InvalidArgumentException $e) {
             return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
@@ -60,7 +63,7 @@ class CareGiverController extends Controller
     {
         $careGiverDto = $this->careGiverService->getByUid($uid);
 
-        if (!$careGiverDto) {
+        if (! $careGiverDto) {
             return response()->json(['message' => 'CareGiver not found'], Response::HTTP_NOT_FOUND);
         }
 
@@ -78,13 +81,33 @@ class CareGiverController extends Controller
             ->setStatusCode(200);
     }
 
+    public function searchByName(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string',
+            'page' => 'sometimes|integer|min:0',
+            'size' => 'sometimes|integer|min:1',
+        ]);
+
+        $page = $validated['page'] ?? 0;
+        $size = $validated['size'] ?? 10;
+
+        $pageable = PageableDto::of($page, $size);
+        $careGivers = $this->careGiverService->searchByNamePaginated($validated['name'], $pageable);
+
+        return CareGiverResource::collection($careGivers)
+            ->response()
+            ->setStatusCode(200);
+    }
+
     public function updateCareNeedOrSkills(Request $request): JsonResponse
     {
         $uid = $request->input('uid');
         $careNeedOrSkills = $request->input('careNeedOrSkills', []);
 
         try {
-            $result = $this->careNeedOrSkillsService->updateCareNeedOrSkills($uid, new \App\Dto\CareNeedOrSkillsDto($careNeedOrSkills));
+            $result = $this->careNeedOrSkillsService->updateCareNeedOrSkills($uid, new CareNeedOrSkillsDto($careNeedOrSkills));
+
             return response()->json(['careNeedOrSkills' => $result->careNeedOrSkills], Response::HTTP_OK);
         } catch (\RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
@@ -98,6 +121,7 @@ class CareGiverController extends Controller
 
         try {
             $result = $this->certificationService->createOrUpdateGiverCert($giverUid, $certifications);
+
             return response()->json(['certifications' => $result], Response::HTTP_OK);
         } catch (\InvalidArgumentException $e) {
             return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
@@ -112,8 +136,9 @@ class CareGiverController extends Controller
         $endTime = $request->input('endTime');
 
         try {
-            $scheduleDto = new \App\Dto\ScheduleDto($days, $startTime, $endTime);
+            $scheduleDto = new ScheduleDto($days, $startTime, $endTime);
             $result = $this->scheduleService->createOrUpdateGiverSchedule($careGiverUid, $scheduleDto);
+
             return response()->json(['schedule' => $result->toArray()], Response::HTTP_OK);
         } catch (\InvalidArgumentException $e) {
             return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
