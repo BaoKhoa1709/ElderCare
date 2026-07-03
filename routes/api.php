@@ -7,6 +7,7 @@ use App\Http\Controllers\CareGiverController;
 use App\Http\Controllers\CareSeekerController;
 use App\Http\Controllers\MomoController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [RegisteredUserController::class, 'register']);
@@ -24,8 +25,15 @@ Route::post('/caregivers/updateCertifications', [CareGiverController::class, 'up
 Route::post('/caregivers/updateSchedule', [CareGiverController::class, 'updateSchedule']);
 Route::post('/booking', [BookingController::class, 'store'])->middleware('auth:sanctum');
 Route::get('/booking/getById/{id}', [BookingController::class, 'getById']);
-Route::get('/booking/getAll', [BookingController::class, 'getAll']);
+Route::get('/booking/getAll', [BookingController::class, 'getAll'])->middleware('auth:sanctum');
 Route::post('/booking/updateStatus', [BookingController::class, 'updateStatus'])->middleware('auth:sanctum');
 Route::post('/booking/decide', [BookingController::class, 'decide'])->middleware('auth:sanctum');
 Route::delete('/booking/{id}', [BookingController::class, 'delete'])->middleware('auth:sanctum');
 Route::get('/test-momo', [MomoController::class, 'testMomoPayment']);
+
+Route::post('/tasks', [TaskController::class, 'create'])->middleware('auth:sanctum');
+Route::get('/tasks/{taskId}', [TaskController::class, 'getById']);
+Route::get('/tasks', [TaskController::class, 'getAll'])->middleware('auth:sanctum');
+Route::get('/tasks/by-booking/{bookingId}', [TaskController::class, 'getAllByBooking'])->middleware('auth:sanctum');
+Route::put('/tasks/{taskId}', [TaskController::class, 'update'])->middleware('auth:sanctum');
+Route::delete('/tasks/{taskId}', [TaskController::class, 'delete'])->middleware('auth:sanctum');
