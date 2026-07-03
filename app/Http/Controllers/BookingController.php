@@ -19,14 +19,14 @@ class BookingController extends Controller
     {
         $data = $request->validate([
             'care_location' => 'required|string|in:CLINIC,AT_HOME',
-            'from_date' => 'required|date',
+            'from_date' => 'required|date|after_or_equal:today',
             'duration' => 'required|integer|min:1',
             'status' => 'nullable|string|in:PENDING,CONFIRMED,COMPLETED,CANCELED',
             'start_time' => 'nullable|date_format:H:i:s',
             'end_time' => 'nullable|date_format:H:i:s|after:start_time',
             'care_seeker_uid' => 'required|string|exists:care_seekers,uid',
             'care_giver_uid' => 'required|string|exists:care_givers,uid',
-            'note' => 'nullable|string',
+            'note' => 'nullable|string|max:500',
             'meeting_link' => 'nullable|url',
             'payment' => 'required|string|in:ONLINE,ON_SITE',
             'type' => 'nullable|string|in:NEW_MESSAGE,MATCH_FOUND,BOOKING_PENDING,BOOKING_CONFIRMED,BOOKING_COMPLETED,BOOKING_CANCELED,REVIEW_RECEIVED,PAYMENT_RECEIVED,TRAINING_AVAILABLE',
@@ -67,6 +67,7 @@ class BookingController extends Controller
         }
 
         $bookings = $this->bookingService->getAllByRole($user);
+
         return BookingResource::collection($bookings)
             ->response()
             ->setStatusCode(200);

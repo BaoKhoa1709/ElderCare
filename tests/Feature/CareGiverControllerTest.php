@@ -16,10 +16,10 @@ class CareGiverControllerTest extends TestCase
     {
         $response = $this->postJson('/api/caregivers', [
             'dob' => '1990-01-01',
-            'phone_number' => '1234567890',
+            'phone_number' => '+11234567890',
             'year_experience' => 5,
             'fee' => 100000,
-            'bio' => 'Test bio',
+            'bio' => 'Test bio test',
         ]);
 
         $response->assertStatus(401);
@@ -39,7 +39,7 @@ class CareGiverControllerTest extends TestCase
         $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/caregivers', [
                 'dob' => '1990-01-01',
-                'phone_number' => '0987654321',
+                'phone_number' => '+84987654321',
                 'year_experience' => 5,
                 'fee' => 100000,
                 'bio' => 'Test caregiver bio',
@@ -63,7 +63,7 @@ class CareGiverControllerTest extends TestCase
 
         $response->assertStatus(201)
             ->assertJsonPath('data.userUid', 'test-uid-1')
-            ->assertJsonPath('data.phoneNumber', '0987654321')
+            ->assertJsonPath('data.phoneNumber', '+84987654321')
             ->assertJsonPath('data.yearExperience', 5)
             ->assertJsonPath('data.fee', 100000)
             ->assertJsonPath('data.bio', 'Test caregiver bio')
@@ -109,7 +109,7 @@ class CareGiverControllerTest extends TestCase
             'uid' => 'existing-caregiver-uid',
             'user_uid' => $user->uid,
             'dob' => '1990-01-01',
-            'phone_number' => '1111111111',
+            'phone_number' => '+11111111111',
             'year_experience' => 1,
             'fee' => 50000,
             'bio' => 'Existing bio',
@@ -118,10 +118,10 @@ class CareGiverControllerTest extends TestCase
         $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/caregivers', [
                 'dob' => '1995-01-01',
-                'phone_number' => '2222222222',
+                'phone_number' => '+12222222222',
                 'year_experience' => 3,
                 'fee' => 80000,
-                'bio' => 'New bio',
+                'bio' => 'New bio text',
             ]);
 
         $response->assertStatus(400)
@@ -143,7 +143,7 @@ class CareGiverControllerTest extends TestCase
             'uid' => 'existing-caregiver-uid-2',
             'user_uid' => $user->uid,
             'dob' => '1990-01-01',
-            'phone_number' => 'existing-phone-number',
+            'phone_number' => '+19999999999',
             'year_experience' => 1,
             'fee' => 50000,
             'bio' => 'Existing bio',
@@ -161,10 +161,10 @@ class CareGiverControllerTest extends TestCase
         $response = $this->actingAs($user2, 'sanctum')
             ->postJson('/api/caregivers', [
                 'dob' => '1995-01-01',
-                'phone_number' => 'existing-phone-number',
+                'phone_number' => '+19999999999',
                 'year_experience' => 3,
                 'fee' => 80000,
-                'bio' => 'New bio',
+                'bio' => 'New bio text',
             ]);
 
         $response->assertStatus(400)

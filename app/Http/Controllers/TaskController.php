@@ -17,7 +17,7 @@ class TaskController extends Controller
     public function create(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'taskName' => 'required|string|max:100',
+            'taskName' => 'required|string|min:1|max:100',
             'type' => 'required|string|in:NEW_MESSAGE,MATCH_FOUND,BOOKING_PENDING,BOOKING_CONFIRMED,BOOKING_COMPLETED,BOOKING_CANCELED,REVIEW_RECEIVED,PAYMENT_RECEIVED,TRAINING_AVAILABLE',
             'bookingId' => 'required|integer|exists:bookings,id',
         ]);
@@ -30,6 +30,7 @@ class TaskController extends Controller
 
         try {
             $taskDto = $this->taskService->create($user, $data);
+
             return (new TaskResource($taskDto))->response()->setStatusCode(201);
         } catch (\InvalidArgumentException $e) {
             return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
@@ -56,6 +57,7 @@ class TaskController extends Controller
         }
 
         $tasks = $this->taskService->getAll($user);
+
         return TaskResource::collection($tasks)->response()->setStatusCode(200);
     }
 
@@ -68,13 +70,14 @@ class TaskController extends Controller
         }
 
         $tasks = $this->taskService->getAllByBooking($bookingId, $user);
+
         return TaskResource::collection($tasks)->response()->setStatusCode(200);
     }
 
     public function update(Request $request, int $taskId): JsonResponse
     {
         $data = $request->validate([
-            'taskName' => 'sometimes|string|max:100',
+            'taskName' => 'sometimes|string|min:1|max:100',
             'type' => 'sometimes|string|in:NEW_MESSAGE,MATCH_FOUND,BOOKING_PENDING,BOOKING_CONFIRMED,BOOKING_COMPLETED,BOOKING_CANCELED,REVIEW_RECEIVED,PAYMENT_RECEIVED,TRAINING_AVAILABLE',
             'bookingId' => 'sometimes|integer|exists:bookings,id',
         ]);
@@ -87,6 +90,7 @@ class TaskController extends Controller
 
         try {
             $taskDto = $this->taskService->update($user, $taskId, $data);
+
             return (new TaskResource($taskDto))->response()->setStatusCode(200);
         } catch (\InvalidArgumentException $e) {
             return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
@@ -103,6 +107,7 @@ class TaskController extends Controller
 
         try {
             $message = $this->taskService->delete($user, $taskId);
+
             return response()->json(['message' => $message], Response::HTTP_OK);
         } catch (\InvalidArgumentException $e) {
             return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
